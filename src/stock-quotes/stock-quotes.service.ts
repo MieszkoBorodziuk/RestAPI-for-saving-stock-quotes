@@ -24,6 +24,9 @@ export class StockQuotesService {
   }
 
   async create(companySymbol: string, createStockQuoteDto: CreateStockQuoteDto) {
+    if(createStockQuoteDto.highPrice < createStockQuoteDto.lowPrice){
+      throw new Error("highPrice must be higher than lowPrice");
+    }
     const newStockQuote = new StockQuote();
     newStockQuote.openPrice = createStockQuoteDto.openPrice;
     newStockQuote.closePrice = createStockQuoteDto.closePrice;

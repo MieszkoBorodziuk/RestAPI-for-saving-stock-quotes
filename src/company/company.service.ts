@@ -13,6 +13,9 @@ export class CompanyService {
   ) { }
 
   async create(createCompanyDto: CreateCompanyDto) {
+    if(this.findOneBySymbol(createCompanyDto.symbol)){
+      throw new Error("Company with this symbol already exists");
+    }
     const newCompany = new Company();
     newCompany.name = createCompanyDto.name;
     newCompany.symbol = createCompanyDto.symbol;

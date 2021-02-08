@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
-import { GetListCompanyResponse, GetOneCompanyResponse } from './interfaces/company';
+import { CompanyInterface, GetListCompanyResponse, GetOneCompanyResponse } from './interfaces/company';
 
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) { }
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
+  create(@Body() createCompanyDto: CreateCompanyDto): Promise<CompanyInterface>  {
     return this.companyService.create(createCompanyDto);
   }
 
