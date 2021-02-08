@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
+import { GetListCompanyResponse, GetOneCompanyResponse } from './interfaces/company';
 
 @Controller('company')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(private readonly companyService: CompanyService) { }
 
   @Post()
   create(@Body() createCompanyDto: CreateCompanyDto) {
@@ -13,22 +13,12 @@ export class CompanyController {
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<GetListCompanyResponse> {
     return this.companyService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.companyService.findOne(+id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companyService.update(+id, updateCompanyDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.companyService.remove(+id);
+  findOne(@Param('id') id: string): Promise<GetOneCompanyResponse> {
+    return this.companyService.findOne(id);
   }
 }
