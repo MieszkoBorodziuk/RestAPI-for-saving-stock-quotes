@@ -1,34 +1,24 @@
 import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
 import { StockQuotesService } from './stock-quotes.service';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
-import { UpdateStockQuoteDto } from './dto/update-stock-quote.dto';
+import { GetListStockQuotesResponse, GetOneStockQutesResponse } from './interfaces/stockQuotes';
 
-@Controller('stock-quotes')
+@Controller('company/:company/stock-quotes')
 export class StockQuotesController {
   constructor(private readonly stockQuotesService: StockQuotesService) {}
 
   @Post()
-  create(@Body() createStockQuoteDto: CreateStockQuoteDto) {
-    return this.stockQuotesService.create(createStockQuoteDto);
+  create(@Param('company') company: string, @Body() createStockQuoteDto: CreateStockQuoteDto) {
+    return this.stockQuotesService.create(company, createStockQuoteDto);
   }
 
   @Get()
-  findAll() {
-    return this.stockQuotesService.findAll();
+  findAll(@Param('company') company: string,): Promise<GetListStockQuotesResponse> {
+    return this.stockQuotesService.findAll(company);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.stockQuotesService.findOne(+id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateStockQuoteDto: UpdateStockQuoteDto) {
-    return this.stockQuotesService.update(+id, updateStockQuoteDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.stockQuotesService.remove(+id);
+  findOne(@Param('id') id: string): Promise<GetOneStockQutesResponse> {
+    return this.stockQuotesService.findOne(id);
   }
 }

@@ -1,11 +1,12 @@
-import { Column, PrimaryGeneratedColumn } from "typeorm";
+import { Company } from "../../company/entities/company.entity";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { StockQutesInterface } from "../interfaces/stockQuotes";
 
-
+@Entity()
 export class StockQuote implements StockQutesInterface{
     @PrimaryGeneratedColumn('uuid')
-    id: number;
-
+    id: string;
+    
     @Column({
         type: 'float',
         scale: 2,
@@ -32,4 +33,8 @@ export class StockQuote implements StockQutesInterface{
 
     @Column()
     date: Date;
+
+    @ManyToOne(type => Company, entity => entity.stockQuote)
+    @JoinColumn()
+    company: Company;
 }
