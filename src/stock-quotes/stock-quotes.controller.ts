@@ -21,4 +21,5 @@ export class StockQuotesController {
   findOne(@Param('id') id: string): Promise<GetOneStockQutesResponse> {
     return this.stockQuotesService.findOne(id);
   }
+  
 }

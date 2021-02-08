@@ -1,4 +1,3 @@
-
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyService } from '../company/company.service';
@@ -24,17 +23,24 @@ export class StockQuotesService {
   }
 
   async create(companySymbol: string, createStockQuoteDto: CreateStockQuoteDto) {
-    if(createStockQuoteDto.highPrice < createStockQuoteDto.lowPrice){
+    if (createStockQuoteDto.highPrice < createStockQuoteDto.lowPrice) {
       throw new Error("highPrice must be higher than lowPrice");
     }
+    
+    const company = await this.findCompany(companySymbol);
+
+    if (await this.findOneByDate(createStockQuoteDto.date, company.id)) {
+      throw new Error("already exists");
+    }
+
     const newStockQuote = new StockQuote();
     newStockQuote.openPrice = createStockQuoteDto.openPrice;
     newStockQuote.closePrice = createStockQuoteDto.closePrice;
     newStockQuote.highPrice = createStockQuoteDto.highPrice;
     newStockQuote.lowPrice = createStockQuoteDto.lowPrice;
     newStockQuote.date = createStockQuoteDto.date;
+    newStockQuote.company = company;
 
-    newStockQuote.company = await this.findCompany(companySymbol);
     await this.stockQuoteRepository.save(newStockQuote);
 
     return newStockQuote;
@@ -56,5 +62,15 @@ export class StockQuotesService {
 
   async findOne(id: string): Promise<StockQuote> {
     return await this.stockQuoteRepository.findOneOrFail(id);
+  }
+
+  async findOneByDate(date: Date, companyId): Promise<StockQuote> {
+    return await this.stockQuoteRepository.findOne(
+      {
+        where: {
+          // company: companyId,
+          date: date,
+        },
+      });
   }
 }

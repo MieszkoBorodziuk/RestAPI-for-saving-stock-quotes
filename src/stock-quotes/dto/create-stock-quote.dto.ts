@@ -1,3 +1,4 @@
+import { Transform, Type } from "class-transformer";
 import { IsDate, IsNumber, Min, min } from "class-validator";
 
 export class CreateStockQuoteDto {
@@ -14,5 +15,6 @@ export class CreateStockQuoteDto {
     @Min(0)
     closePrice: number;
     @IsDate()
+    @Type(_ => Date)
     date: Date;
 }
