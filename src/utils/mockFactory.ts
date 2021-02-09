@@ -8,6 +8,8 @@ export type RepositoryMock<T> = {
     find: jest.fn(entity => entity),
     findOneOrFail: jest.fn(entity => entity),
     findOneBySymbol: jest.fn(entity => entity),
+    findAndCount: jest.fn(entity => entity),
+    findOneByDate: jest.fn(entity => entity),
   }));
 
   

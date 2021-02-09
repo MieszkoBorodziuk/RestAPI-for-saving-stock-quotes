@@ -35,26 +35,40 @@ describe('CompanyService', () => {
     company.name = request.name;
     company.symbol = request.symbol;
 
+    repository.findOne.mockReturnValue(null);
 
     repository.save.mockReturnValue(company);
 
-    expect(await service.create(request)).toStrictEqual(company)
+    expect(await service.create(request)).toEqual(company)
+  })
+
+  it('should throw error when call creat and company.symbol is already exists', async () => {
+    const request = new CreateCompanyDto();
+    request.name = "test";
+    request.symbol = "TST";
+
+    const company = new Company();
+    company.name = request.name;
+    company.symbol = request.symbol;
+
+    repository.findOneOrFail.mockReturnValue(company);
+    repository.save.mockReturnValue(company);
+
+    await expect(service.create(request)).rejects.toEqual(new Error("Company with this symbol already exists"))
   })
 
   it('should return an array of company when call findAll', async () => {
-    const result = [new Company()];
 
-    repository.find.mockReturnValue(result);
+    repository.findAndCount.mockReturnValue([[new Company()], 1]);
 
-    expect(await service.findAll()).toBe(result)
+    expect(await service.findAll()).toStrictEqual({ company: [new Company()], pagesCount: 1 })
   })
 
   it('should return empty array of company when repository return empty Array', async () => {
-    const result = [];
 
-    repository.find.mockReturnValue(result);
+    repository.findAndCount.mockReturnValue([[], 1]);
 
-    expect(await service.findAll()).toBe(result)
+    expect(await service.findAll()).toStrictEqual({ company: [], pagesCount: 1 })
   })
 
   it('should return one company when call findOne', async () => {
@@ -72,7 +86,7 @@ describe('CompanyService', () => {
     result.name = "test";
     result.symbol = "TST";
 
-    repository.findOneOrFail.mockReturnValue(result);
+    repository.findOne.mockReturnValue(result);
 
     expect(await service.findOneBySymbol(result.symbol)).toBe(result)
   })

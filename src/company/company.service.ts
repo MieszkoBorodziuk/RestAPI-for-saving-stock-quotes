@@ -13,7 +13,7 @@ export class CompanyService {
   ) { }
 
   async create(createCompanyDto: CreateCompanyDto) {
-    if (this.findOneBySymbol(createCompanyDto.symbol)) {
+    if (await this.findOneBySymbol(createCompanyDto.symbol)) {
       throw new Error("Company with this symbol already exists");
     }
     const newCompany = new Company();
@@ -40,7 +40,7 @@ export class CompanyService {
   }
 
   async findOneBySymbol(symbol: string): Promise<Company> {
-    return await this.companyRepository.findOneOrFail({ symbol: symbol });
+    return await this.companyRepository.findOne({ symbol: symbol });
   }
 
   async findOne(id: string): Promise<CompanyInterface> {

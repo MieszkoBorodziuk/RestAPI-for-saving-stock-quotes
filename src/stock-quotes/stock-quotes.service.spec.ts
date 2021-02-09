@@ -2,11 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StockQuotesService } from './stock-quotes.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { StockQuote } from './entities/stock-quote.entity';
-import { RepositoryMock, repositoryMockFactory} from '../utils/mockFactory';
+import { RepositoryMock, repositoryMockFactory } from '../utils/mockFactory';
 import { Repository } from 'typeorm';
 import { CompanyService } from '../company/company.service';
 import { Company } from '../company/entities/company.entity';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
+import { uuidv4 } from '../utils/uuid';
 
 describe('StockQuotesService', () => {
   let service: StockQuotesService;
@@ -38,61 +39,120 @@ describe('StockQuotesService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create new StockQuote when call create', async () => {
-
+  const generateRequest = () => {
     const request = new CreateStockQuoteDto();
     request.openPrice = 1;
     request.closePrice = 2;
     request.highPrice = 3;
     request.lowPrice = 1;
-    request.date = new Date(1995,11,17,3,24,0);
+    request.date = new Date(1995, 11, 17, 3, 24, 0);
+    return request;
+  }
 
-    const company = new Company();
-    company.name = "Test"
-    company.symbol = "TST"
-
+  const genrateStockQuoteFromRequest = (request, company) => {
     const stockQuote = new StockQuote();
+    stockQuote.id = uuidv4();
     stockQuote.openPrice = request.openPrice;
     stockQuote.closePrice = request.closePrice;
     stockQuote.highPrice = request.highPrice;
     stockQuote.lowPrice = request.lowPrice;
     stockQuote.date = request.date;
     stockQuote.company = company;
+    return stockQuote;
+  }
+
+  const genrateStockQuote = () => {
+    const stockQuote = new StockQuote();
+    stockQuote.id = uuidv4();
+    stockQuote.openPrice = 1;
+    stockQuote.closePrice = 2;
+    stockQuote.highPrice = 5;
+    stockQuote.lowPrice = 1;
+    stockQuote.date = new Date(1995, 11, 17, 3, 24, 0);
+    stockQuote.company = new Company();
+    return stockQuote;
+  }
+  
+
+
+  it('should create new StockQuote when call create', async () => {
+
+    const request = generateRequest();
+
+    const company = new Company();
+    company.name = "Test"
+    company.symbol = "TST"
+
+    const stockQuote = genrateStockQuoteFromRequest(request, company);
 
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
+    repository.findOne.mockReturnValue(null);
     repository.save.mockReturnValue(stockQuote);
 
-    expect(await service.create(company.symbol, request)).toStrictEqual(stockQuote)
+    expect(await service.create(company.symbol, request)).toEqual(stockQuote)
   })
 
+  it('should create new StockQuote when call create and already exists ', async () => {
+
+    const request = generateRequest();
+
+
+    const company = new Company();
+    company.id = uuidv4();
+    company.name = "Test"
+    company.symbol = "TST"
+
+    const stockQuote = genrateStockQuoteFromRequest(request, company);
+
+
+    companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
+    repository.findOne.mockReturnValue(stockQuote);
+    repository.save.mockReturnValue(stockQuote);
+
+    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new Error("already exists"))
+  })
+
+  it('should create new StockQuote when call create and lowPrice is higher than highPrice', async () => {
+
+    const request = generateRequest();
+    request.lowPrice = 10;
+
+
+    const company = new Company();
+    company.id = uuidv4();
+    company.name = "Test"
+    company.symbol = "TST"
+
+    const stockQuote = genrateStockQuoteFromRequest(request, company);
+
+    companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
+    repository.findOne.mockReturnValue(null)
+    repository.save.mockReturnValue(stockQuote);
+
+    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new Error("highPrice must be higher than lowPrice"))
+  })
 
   it('should return an array of StockQote when call findAll', async () => {
-    const result = [new StockQuote()];
+    const dbStockQoutes = [genrateStockQuote(), genrateStockQuote()]
+    const result = [dbStockQoutes, 2];
 
-    repository.find.mockReturnValue(result);
+    repository.findAndCount.mockReturnValue(result);
 
-    expect(await service.findAll('test')).toBe(result)
+    expect(await service.findAll('test')).toStrictEqual({ stockQuotes: dbStockQoutes, pagesCount: 1 })
   })
 
   it('should return empty array of StockQuote when repository return empty Array', async () => {
-    const result = [];
+    const result = [[], 1];
 
-    repository.find.mockReturnValue(result);
+    repository.findAndCount.mockReturnValue(result);
 
-    expect(await service.findAll('test')).toBe(result)
+    expect(await service.findAll('test')).toStrictEqual({ stockQuotes: [], pagesCount: 1 })
   })
 
   it('should return one StockQuote when call findOne', async () => {
-    const company = new Company();
-    const result = new StockQuote();
-    result.openPrice = 1;
-    result.closePrice = 2;
-    result.highPrice = 3;
-    result.lowPrice = 1;
-    result.date = new Date(1995,11,17,3,24,0);
-    result.company = company;
+    const result = genrateStockQuote();
 
-    repository.findOneOrFail.mockReturnValue(result); 
+    repository.findOneOrFail.mockReturnValue(result);
 
     expect(await service.findOne(result.id)).toBe(result)
   })

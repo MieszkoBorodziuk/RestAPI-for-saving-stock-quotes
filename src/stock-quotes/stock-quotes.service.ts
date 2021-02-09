@@ -41,9 +41,7 @@ export class StockQuotesService {
     newStockQuote.date = createStockQuoteDto.date;
     newStockQuote.company = company;
 
-    await this.stockQuoteRepository.save(newStockQuote);
-
-    return newStockQuote;
+    return this.stockQuoteRepository.save(newStockQuote);
   }
 
   async findAll(searchTerm: string, currentPage: number = 1): Promise<GetPaginatedListOfStockQotesResponse> {
@@ -59,7 +57,7 @@ export class StockQuotesService {
         company,
       },
       relations: ['company'],
-      
+
       skip: maxPerPage * (currentPage - 1),
       take: 3
     });
@@ -70,7 +68,7 @@ export class StockQuotesService {
       stockQuotes,
       pagesCount
     };
-          
+
   }
 
   async findOne(id: string): Promise<StockQuote> {
@@ -81,7 +79,7 @@ export class StockQuotesService {
     return await this.stockQuoteRepository.findOne(
       {
         where: {
-          // company: companyId,
+          company: companyId,
           date: date,
         },
       });
