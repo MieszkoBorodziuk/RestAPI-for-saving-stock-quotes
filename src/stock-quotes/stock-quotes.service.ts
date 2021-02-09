@@ -5,7 +5,7 @@ import { Company } from '../company/entities/company.entity';
 import { Repository } from 'typeorm';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { StockQuote } from './entities/stock-quote.entity';
-import { StockQutesInterface } from './interfaces/stockQuotes';
+import { GetPaginatedListOfStockQotesResponse } from './interfaces/stockQuotes';
 
 @Injectable()
 export class StockQuotesService {
@@ -26,7 +26,7 @@ export class StockQuotesService {
     if (createStockQuoteDto.highPrice < createStockQuoteDto.lowPrice) {
       throw new Error("highPrice must be higher than lowPrice");
     }
-    
+
     const company = await this.findCompany(companySymbol);
 
     if (await this.findOneByDate(createStockQuoteDto.date, company.id)) {
@@ -46,18 +46,31 @@ export class StockQuotesService {
     return newStockQuote;
   }
 
-  async findAll(searchTerm: string): Promise<StockQutesInterface[]> {
+  async findAll(searchTerm: string, currentPage: number = 1): Promise<GetPaginatedListOfStockQotesResponse> {
     const company = await this.companyService.findOneBySymbol(searchTerm);
     if (!company) {
       throw new Error("Company not found");
     }
-    return await this.stockQuoteRepository.find(
-      {
-        where: {
-          company,
-        },
-        relations: ['company']
-      });
+    const maxPerPage = 3;
+
+    const [stockQuotes, count] = await this.stockQuoteRepository.findAndCount({
+
+      where: {
+        company,
+      },
+      relations: ['company'],
+      
+      skip: maxPerPage * (currentPage - 1),
+      take: 3
+    });
+
+    const pagesCount = Math.ceil(count / maxPerPage);
+
+    return {
+      stockQuotes,
+      pagesCount
+    };
+          
   }
 
   async findOne(id: string): Promise<StockQuote> {

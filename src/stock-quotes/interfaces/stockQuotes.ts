@@ -10,3 +10,8 @@ export interface StockQutesInterface {
 export type GetListStockQuotesResponse = StockQutesInterface[];
 
 export type GetOneStockQutesResponse = StockQutesInterface;
+
+export interface GetPaginatedListOfStockQotesResponse {
+    stockQuotes: StockQutesInterface[];
+    pagesCount: number;
+}
