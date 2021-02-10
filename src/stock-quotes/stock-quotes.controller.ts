@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { StockQuotesService } from './stock-quotes.service';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { GetOneStockQutesResponse, GetPaginatedListOfStockQotesResponse } from './interfaces/stockQuotes';
@@ -7,7 +7,7 @@ import { GetOneStockQutesResponse, GetPaginatedListOfStockQotesResponse } from '
 export class StockQuotesController {
   constructor(private readonly stockQuotesService: StockQuotesService) { }
 
-  @Post()
+  @Post('/')
   create
     (@Param('company') company: string,
       @Body() createStockQuoteDto: CreateStockQuoteDto,
@@ -15,12 +15,13 @@ export class StockQuotesController {
     return this.stockQuotesService.create(company, createStockQuoteDto);
   }
 
-  @Get('/:pageNumber')
+  @Get('/')
   findAll(
     @Param('company',) company: string,
-    @Param('pageNumber') pageNumber: string,
+    @Query('pageNumber') pageNumber: string,
+    @Query('pageSize') pageSize: string,
   ): Promise<GetPaginatedListOfStockQotesResponse> {
-    return this.stockQuotesService.findAll(company, Number(pageNumber));
+    return this.stockQuotesService.findAll(company, Number(pageNumber), Number(pageSize));
   }
 
   @Get(':id')

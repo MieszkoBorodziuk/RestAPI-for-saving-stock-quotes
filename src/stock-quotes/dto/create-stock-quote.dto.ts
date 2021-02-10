@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsDate, IsNumber, Min, min } from "class-validator";
+import { IsDate, IsNumber, Min } from "class-validator";
 
 export class CreateStockQuoteDto {
     @IsNumber()

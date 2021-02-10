@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyService } from '../company/company.service';
 import { Company } from '../company/entities/company.entity';
@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { StockQuote } from './entities/stock-quote.entity';
 import { GetPaginatedListOfStockQotesResponse } from './interfaces/stockQuotes';
+import { HttpException } from '@nestjs/common';
 
 @Injectable()
 export class StockQuotesService {
@@ -19,18 +20,25 @@ export class StockQuotesService {
     const company = (await this.companyService.findOneBySymbol(symbol));
     if (company) {
       return company
-    }
+    };
   }
 
   async create(companySymbol: string, createStockQuoteDto: CreateStockQuoteDto) {
     if (createStockQuoteDto.highPrice < createStockQuoteDto.lowPrice) {
-      throw new Error("highPrice must be higher than lowPrice");
+      throw new HttpException({
+        status: HttpStatus.BAD_REQUEST,
+        error: "highPrice must be higher than lowPrice"
+      },
+        HttpStatus.BAD_REQUEST);
     }
 
     const company = await this.findCompany(companySymbol);
 
     if (await this.findOneByDate(createStockQuoteDto.date, company.id)) {
-      throw new Error("already exists");
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: 'This stock quote already exists',
+      }, HttpStatus.FORBIDDEN);
     }
 
     const newStockQuote = new StockQuote();
@@ -42,14 +50,22 @@ export class StockQuotesService {
     newStockQuote.company = company;
 
     return this.stockQuoteRepository.save(newStockQuote);
+
   }
 
-  async findAll(searchTerm: string, currentPage: number = 1): Promise<GetPaginatedListOfStockQotesResponse> {
+  async findAll(searchTerm: string, pageNumber: number = 1, pageSize: number = 3): Promise<GetPaginatedListOfStockQotesResponse> {
+    isNaN(pageNumber) ? pageNumber = 1 : pageNumber;
+    isNaN(pageSize) ? pageSize = 5 : pageSize;
+
     const company = await this.companyService.findOneBySymbol(searchTerm);
     if (!company) {
-      throw new Error("Company not found");
+      throw new HttpException({
+        status: HttpStatus.BAD_REQUEST,
+        error: "Company not found"
+      },
+        HttpStatus.BAD_REQUEST);
     }
-    const maxPerPage = 3;
+
 
     const [stockQuotes, count] = await this.stockQuoteRepository.findAndCount({
 
@@ -58,17 +74,16 @@ export class StockQuotesService {
       },
       relations: ['company'],
 
-      skip: maxPerPage * (currentPage - 1),
+      skip: pageSize * (pageNumber - 1),
       take: 3
     });
 
-    const pagesCount = Math.ceil(count / maxPerPage);
+    const pagesCount = Math.ceil(count / pageSize);
 
     return {
       stockQuotes,
       pagesCount
     };
-
   }
 
   async findOne(id: string): Promise<StockQuote> {

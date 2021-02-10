@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,7 +15,10 @@ export class CompanyService {
 
   async create(createCompanyDto: CreateCompanyDto) {
     if (await this.findOneBySymbol(createCompanyDto.symbol)) {
-      throw new Error("Company with this symbol already exists");
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: 'Company with this symbol already exists',
+      }, HttpStatus.FORBIDDEN);
     }
     const newCompany = new Company();
     newCompany.name = createCompanyDto.name;
@@ -24,15 +28,18 @@ export class CompanyService {
     return newCompany;
   }
 
-  async findAll(currentPage: number = 1): Promise<GetPaginatedListOfCompanyResponse> {
-    const maxPerPage = 3;
+  async findAll(pageNumber: number = 1, pageSize: number = 3): Promise<GetPaginatedListOfCompanyResponse> {
+
+    isNaN(pageNumber) ? pageNumber = 1 : pageNumber;
+    isNaN(pageSize) ? pageSize = 5 : pageSize;
 
     const [company, count] = await this.companyRepository.findAndCount({
-      skip: maxPerPage * (currentPage - 1),
-      take: 3
+      skip: pageSize * (pageNumber - 1),
+      take: pageSize
     });
 
-    const pagesCount = Math.ceil(count / maxPerPage);
+    const pagesCount = Math.ceil(count / pageSize);
+
     return {
       company,
       pagesCount

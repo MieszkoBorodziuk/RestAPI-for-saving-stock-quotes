@@ -8,6 +8,8 @@ import { CompanyService } from '../company/company.service';
 import { Company } from '../company/entities/company.entity';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { uuidv4 } from '../utils/uuid';
+import { HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 
 describe('StockQuotesService', () => {
   let service: StockQuotesService;
@@ -73,8 +75,6 @@ describe('StockQuotesService', () => {
     return stockQuote;
   }
   
-
-
   it('should create new StockQuote when call create', async () => {
 
     const request = generateRequest();
@@ -96,7 +96,6 @@ describe('StockQuotesService', () => {
 
     const request = generateRequest();
 
-
     const company = new Company();
     company.id = uuidv4();
     company.name = "Test"
@@ -104,19 +103,20 @@ describe('StockQuotesService', () => {
 
     const stockQuote = genrateStockQuoteFromRequest(request, company);
 
-
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
     repository.findOne.mockReturnValue(stockQuote);
     repository.save.mockReturnValue(stockQuote);
 
-    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new Error("already exists"))
+    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
+      status: HttpStatus.FORBIDDEN,
+      error: 'This stock quote already exists',
+    }, HttpStatus.FORBIDDEN))
   })
 
   it('should create new StockQuote when call create and lowPrice is higher than highPrice', async () => {
 
     const request = generateRequest();
     request.lowPrice = 10;
-
 
     const company = new Company();
     company.id = uuidv4();
@@ -129,7 +129,10 @@ describe('StockQuotesService', () => {
     repository.findOne.mockReturnValue(null)
     repository.save.mockReturnValue(stockQuote);
 
-    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new Error("highPrice must be higher than lowPrice"))
+    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
+      status: HttpStatus.BAD_REQUEST,
+      error: "highPrice must be higher than lowPrice"},
+      HttpStatus.BAD_REQUEST))
   })
 
   it('should return an array of StockQote when call findAll', async () => {

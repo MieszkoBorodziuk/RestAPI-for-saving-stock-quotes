@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query} from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { CompanyInterface, GetOneCompanyResponse, GetPaginatedListOfCompanyResponse } from './interfaces/company';
@@ -14,11 +14,12 @@ export class CompanyController {
     return this.companyService.create(createCompanyDto);
   }
 
-  @Get('/:pageNumber')
+  @Get('/')
   findAll(
-    @Param('pageNumber') pageNumber: string,
-  ): Promise<GetPaginatedListOfCompanyResponse> {
-    return this.companyService.findAll(Number(pageNumber));
+    @Query('pageNumber') pageNumber: string,
+    @Query('pageSize') pageSize: string,
+  ): Promise<GetPaginatedListOfCompanyResponse> {    
+    return this.companyService.findAll(parseInt(pageNumber), parseInt(pageSize));
   }
 
   @Get(':id')
