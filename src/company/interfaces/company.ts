@@ -1,14 +1,21 @@
-export interface CompanyInterface {
+import { ApiProperty } from "@nestjs/swagger";
+
+export class CompanyResponse {
+    @ApiProperty()
     id: string;
+    @ApiProperty()
     name: string;
+    @ApiProperty()
     symbol: string;
 }
 
-export type GetListCompanyResponse = CompanyInterface[];
+export type GetListCompanyResponse = CompanyResponse[];
 
-export type GetOneCompanyResponse = CompanyInterface;
+export type GetOneCompanyResponse = CompanyResponse;
 
-export interface GetPaginatedListOfCompanyResponse {
-    company: CompanyInterface[];
+export class GetPaginatedListOfCompanyResponse {
+    @ApiProperty({ type: [CompanyResponse]})
+    company: CompanyResponse[];
+    @ApiProperty()
     pagesCount: number;
 }

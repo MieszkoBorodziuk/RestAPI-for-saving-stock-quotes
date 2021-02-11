@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { Company } from './entities/company.entity';
-import { CompanyInterface, GetPaginatedListOfCompanyResponse } from './interfaces/company';
+import { CompanyResponse, GetPaginatedListOfCompanyResponse } from './interfaces/company';
 
 @Injectable()
 export class CompanyService {
@@ -28,10 +28,7 @@ export class CompanyService {
     return newCompany;
   }
 
-  async findAll(pageNumber: number = 1, pageSize: number = 3): Promise<GetPaginatedListOfCompanyResponse> {
-
-    isNaN(pageNumber) ? pageNumber = 1 : pageNumber;
-    isNaN(pageSize) ? pageSize = 5 : pageSize;
+  async findAll(pageNumber: number, pageSize: number): Promise<GetPaginatedListOfCompanyResponse> {
 
     const [company, count] = await this.companyRepository.findAndCount({
       skip: pageSize * (pageNumber - 1),
@@ -50,7 +47,7 @@ export class CompanyService {
     return await this.companyRepository.findOne({ symbol: symbol });
   }
 
-  async findOne(id: string): Promise<CompanyInterface> {
+  async findOne(id: string): Promise<CompanyResponse> {
     return await this.companyRepository.findOneOrFail(id);
   }
 }

@@ -53,15 +53,13 @@ export class StockQuotesService {
 
   }
 
-  async findAll(searchTerm: string, pageNumber: number = 1, pageSize: number = 3): Promise<GetPaginatedListOfStockQotesResponse> {
-    isNaN(pageNumber) ? pageNumber = 1 : pageNumber;
-    isNaN(pageSize) ? pageSize = 5 : pageSize;
+  async findAll(searchTerm: string, pageNumber: number, pageSize: number): Promise<GetPaginatedListOfStockQotesResponse> {
 
     const company = await this.companyService.findOneBySymbol(searchTerm);
     if (!company) {
       throw new HttpException({
         status: HttpStatus.BAD_REQUEST,
-        error: "Company not found"
+        error: "No company found with this symbol"
       },
         HttpStatus.BAD_REQUEST);
     }

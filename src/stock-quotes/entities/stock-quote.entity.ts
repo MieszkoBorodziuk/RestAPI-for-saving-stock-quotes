@@ -1,9 +1,9 @@
 import { Company } from "../../company/entities/company.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { StockQutesInterface } from "../interfaces/stockQuotes";
+import { StockQutesResponse } from "../interfaces/stockQuotes";
 
 @Entity()
-export class StockQuote implements StockQutesInterface{
+export class StockQuote implements StockQutesResponse{
     @PrimaryGeneratedColumn('uuid')
     id: string;
     

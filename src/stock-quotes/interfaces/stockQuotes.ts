@@ -1,17 +1,27 @@
-export interface StockQutesInterface {
+import { ApiProperty } from "@nestjs/swagger";
+
+export class StockQutesResponse {
+    @ApiProperty()
     id: string;
+    @ApiProperty()
     openPrice: number;
+    @ApiProperty()
     highPrice: number;
+    @ApiProperty()
     lowPrice: number;
+    @ApiProperty()
     closePrice: number;
+    @ApiProperty()
     date: Date;
 }
 
-export type GetListStockQuotesResponse = StockQutesInterface[];
+export type GetListStockQuotesResponse = StockQutesResponse[];
 
-export type GetOneStockQutesResponse = StockQutesInterface;
+export type GetOneStockQutesResponse = StockQutesResponse;
 
-export interface GetPaginatedListOfStockQotesResponse {
-    stockQuotes: StockQutesInterface[];
+export class GetPaginatedListOfStockQotesResponse {
+    @ApiProperty({ type: [StockQutesResponse]})
+    stockQuotes: StockQutesResponse[];
+    @ApiProperty()
     pagesCount: number;
 }
