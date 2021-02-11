@@ -7,6 +7,8 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { Company } from './entities/company.entity';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
+import { uuidv4 } from '../utils/uuid';
+
 
 describe('CompanyService', () => {
   let service: CompanyService;
@@ -28,30 +30,41 @@ describe('CompanyService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create new company when call create', async () => {
+  const generateRequest = () => {
     const request = new CreateCompanyDto();
     request.name = "test";
     request.symbol = "TST";
+    return request;
+  }
 
+  const generateCompanyFromRequest = (request) => {
     const company = new Company();
     company.name = request.name;
     company.symbol = request.symbol;
+    return company;
+  }
 
+  const generateCompany = () => {
+    const company = new Company();
+    company.id = uuidv4();
+    company.name = "test";
+    company.symbol = "TST";
+    return company;
+  }
+
+  it('should create new company when call create', async () => {
+    const request = generateRequest();
+    const company = generateCompanyFromRequest(request);
+    
     repository.findOne.mockReturnValue(null);
-
     repository.save.mockReturnValue(company);
 
     expect(await service.create(request)).toEqual(company);
   })
 
   it('should throw error when call creat and company.symbol is already exists', async () => {
-    const request = new CreateCompanyDto();
-    request.name = "test";
-    request.symbol = "TST";
-
-    const company = new Company();
-    company.name = request.name;
-    company.symbol = request.symbol;
+    const request = generateRequest();
+    const company = generateCompanyFromRequest(request);
 
     repository.findOneOrFail.mockReturnValue(company);
     repository.save.mockReturnValue(company);
@@ -66,20 +79,18 @@ describe('CompanyService', () => {
 
     repository.findAndCount.mockReturnValue([[new Company()], 1]);
 
-    expect(await service.findAll()).toStrictEqual({ company: [new Company()], pagesCount: 1 });
+    expect(await service.findAll(1, 3)).toStrictEqual({ company: [new Company()], pagesCount: 1 });
   })
 
   it('should return empty array of company when repository return empty Array', async () => {
 
     repository.findAndCount.mockReturnValue([[], 1]);
 
-    expect(await service.findAll()).toStrictEqual({ company: [], pagesCount: 1 })
+    expect(await service.findAll(1, 3)).toStrictEqual({ company: [], pagesCount: 1 })
   })
 
   it('should return one company when call findOne', async () => {
-    const result = new Company();
-    result.name = "test";
-    result.symbol = "TST";
+    const result = generateCompany();
 
     repository.findOneOrFail.mockReturnValue(result);
 
@@ -87,9 +98,7 @@ describe('CompanyService', () => {
   })
 
   it('should return one company when call findOneBySymbol', async () => {
-    const result = new Company();
-    result.name = "test";
-    result.symbol = "TST";
+    const result = generateCompany();
 
     repository.findOne.mockReturnValue(result);
 

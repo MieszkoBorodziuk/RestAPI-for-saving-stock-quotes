@@ -51,7 +51,7 @@ describe('StockQuotesService', () => {
     return request;
   }
 
-  const genrateStockQuoteFromRequest = (request, company) => {
+  const generateStockQuoteFromRequest = (request, company) => {
     const stockQuote = new StockQuote();
     stockQuote.id = uuidv4();
     stockQuote.openPrice = request.openPrice;
@@ -63,7 +63,7 @@ describe('StockQuotesService', () => {
     return stockQuote;
   }
 
-  const genrateStockQuote = () => {
+  const generateStockQuote = () => {
     const stockQuote = new StockQuote();
     stockQuote.id = uuidv4();
     stockQuote.openPrice = 1;
@@ -74,7 +74,7 @@ describe('StockQuotesService', () => {
     stockQuote.company = new Company();
     return stockQuote;
   }
-  
+
   it('should create new StockQuote when call create', async () => {
 
     const request = generateRequest();
@@ -83,7 +83,7 @@ describe('StockQuotesService', () => {
     company.name = "Test"
     company.symbol = "TST"
 
-    const stockQuote = genrateStockQuoteFromRequest(request, company);
+    const stockQuote = generateStockQuoteFromRequest(request, company);
 
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
     repository.findOne.mockReturnValue(null);
@@ -101,7 +101,7 @@ describe('StockQuotesService', () => {
     company.name = "Test"
     company.symbol = "TST"
 
-    const stockQuote = genrateStockQuoteFromRequest(request, company);
+    const stockQuote = generateStockQuoteFromRequest(request, company);
 
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
     repository.findOne.mockReturnValue(stockQuote);
@@ -123,7 +123,7 @@ describe('StockQuotesService', () => {
     company.name = "Test"
     company.symbol = "TST"
 
-    const stockQuote = genrateStockQuoteFromRequest(request, company);
+    const stockQuote = generateStockQuoteFromRequest(request, company);
 
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
     repository.findOne.mockReturnValue(null)
@@ -131,17 +131,18 @@ describe('StockQuotesService', () => {
 
     await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
       status: HttpStatus.BAD_REQUEST,
-      error: "highPrice must be higher than lowPrice"},
+      error: "highPrice must be higher than lowPrice"
+    },
       HttpStatus.BAD_REQUEST))
   })
 
   it('should return an array of StockQote when call findAll', async () => {
-    const dbStockQoutes = [genrateStockQuote(), genrateStockQuote()]
+    const dbStockQoutes = [generateStockQuote(), generateStockQuote()]
     const result = [dbStockQoutes, 2];
 
     repository.findAndCount.mockReturnValue(result);
 
-    expect(await service.findAll('test')).toStrictEqual({ stockQuotes: dbStockQoutes, pagesCount: 1 })
+    expect(await service.findAll('test', 1, 3)).toStrictEqual({ stockQuotes: dbStockQoutes, pagesCount: 1 })
   })
 
   it('should return empty array of StockQuote when repository return empty Array', async () => {
@@ -149,11 +150,11 @@ describe('StockQuotesService', () => {
 
     repository.findAndCount.mockReturnValue(result);
 
-    expect(await service.findAll('test')).toStrictEqual({ stockQuotes: [], pagesCount: 1 })
+    expect(await service.findAll('test', 1, 5)).toStrictEqual({ stockQuotes: [], pagesCount: 1 })
   })
 
   it('should return one StockQuote when call findOne', async () => {
-    const result = genrateStockQuote();
+    const result = generateStockQuote();
 
     repository.findOneOrFail.mockReturnValue(result);
 
