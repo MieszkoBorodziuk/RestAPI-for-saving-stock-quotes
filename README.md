@@ -17,30 +17,26 @@ Run concurrency tests:
 
 2 createCompany.sh - send POST request <host>/company with body {"name": "<name>","symbol": "<symbol>"}. 
 
-Run:```shell  ./createCompany.sh <host> <name> <symbol>```.
+Run:```./createCompany.sh <host> <name> <symbol>```.
 
 3 createStockQuotes.sh - send 10 times POST request <host>/company/<symbol>/stock-quotes with body 
-```json
+```
 {
 	    "openPrice": 1,
-
 	    "closePrice": 5,
-
 	    "highPrice": 6,
-
 	    "lowPrice": 1,
-
 	    "date": "2020-10-01T12:00:00Z"
 }.
 ```
-Run: ```shell ./createStockQuotes.sh <host> <symbol>```.
+Run: ```./createStockQuotes.sh <host> <symbol>```.
 
 4 concurrencyTest.sh - run createCompany.sh for Adam(ADA) and Krzysztof(KTK) company, then simultaneously run createStockQuotes.sh 2 times for each company and at the end wait 5sec and run get.sh to check 
 if return stock quotes length is 1. 
 
- Run:```shell ./concurrencyTest.sh <url>```.
+ Run:```./concurrencyTest.sh <url>```.
 
- example: ```shell ./concurrencyTest.sh localhost3000```
+ example: ```./concurrencyTest.sh localhost3000```
 
 ## Documents
 Data model in ```./documents/Diagram.pdf```
