@@ -11,8 +11,25 @@ Build project: ```$ yarn start``` Built application can be found in dist folder.
 
 Run unit tests: ```$ yarn jest```
 
+Run concurrency tests: 
+
+1 getStocks.sh - send GET request <host>/company/<id>. Run: ./getStocks.sh <host> <id>.
+2 createCompany.sh - send POST request <host>/company with body {"name": "<name>","symbol": "<symbol>"}. Run: ./createCompany.sh <host> <name> <symbol>.
+3 createStockQuotes.sh - send 10 times POST request <host>/company/<symbol>/stock-quotes with body 
+{
+	    "openPrice": 1,
+	    "closePrice": 5,
+	    "highPrice": 6,
+	    "lowPrice": 1,
+	    "date": "2020-10-01T12:00:00Z"
+}.
+ ```Run: ./createStockQuotes.sh <host> <symbol>```.
+4 concurrencyTest.sh - run createCompany.sh for Adam(ADA) and Krzysztof(KTK) company, then simultaneously run createStockQuotes.sh 2 times for each company and at the end wait 5sec and run get.sh to check 
+if return stock quotes length is 1. 
+ ```Run: ./concurrencyTest.sh```.
+
 ## Documents
-Data model in ```(documents/Diagram.pdf)```
+Data model in ```./documents/Diagram.pdf```
 
 Document API With Swagger on ```localhost:3000/API/```
 
