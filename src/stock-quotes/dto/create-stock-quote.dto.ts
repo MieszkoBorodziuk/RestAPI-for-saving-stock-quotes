@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsNumber, Min } from "class-validator";
+import { IsDate, IsNumber, Min } from "class-validator";
 
 export class CreateStockQuoteDto {
     @ApiProperty()
@@ -20,7 +20,7 @@ export class CreateStockQuoteDto {
     @Min(0)
     closePrice: number;
     @ApiProperty()
+    @IsDate()
     @Type(() => Date)
-    @IsDateString()
     date: Date;
 }

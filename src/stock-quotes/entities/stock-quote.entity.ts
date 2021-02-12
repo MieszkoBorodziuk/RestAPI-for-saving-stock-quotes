@@ -1,8 +1,9 @@
 import { Company } from "../../company/entities/company.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { StockQutesResponse } from "../interfaces/stockQuotes";
 
 @Entity()
+@Unique(['company', 'date'])
 export class StockQuote implements StockQutesResponse {
     @PrimaryGeneratedColumn('uuid')
     id: string;

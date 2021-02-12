@@ -90,6 +90,7 @@ export class StockQuotesService {
 
   async findOneByDate(date: Date, companyId: string): Promise<StockQuote> { 
 
+
     return await this.stockQuoteRepository.findOne(
       {
         where: {
