@@ -5,7 +5,7 @@ import { Company } from '../company/entities/company.entity';
 import { Repository } from 'typeorm';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { StockQuote } from './entities/stock-quote.entity';
-import { GetPaginatedListOfStockQotesResponse } from './interfaces/stockQuotes';
+import { GetPaginatedListOfStockQotesResponse } from './dto/stockQuotes.dts';
 import { HttpException } from '@nestjs/common';
 
 @Injectable()

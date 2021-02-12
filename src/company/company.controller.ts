@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
-import { CompanyResponse, GetOneCompanyResponse, GetPaginatedListOfCompanyResponse } from './interfaces/company';
+import { CompanyResponse, GetOneCompanyResponse, GetPaginatedListOfCompanyResponse } from './dto/companydto.';
 
 @Controller('company')
 export class CompanyController {

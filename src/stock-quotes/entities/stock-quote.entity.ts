@@ -1,6 +1,6 @@
 import { Company } from "../../company/entities/company.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
-import { StockQutesResponse } from "../interfaces/stockQuotes";
+import { StockQutesResponse } from "../dto/stockQuotes.dts";
 
 @Entity()
 @Unique(['company', 'date'])

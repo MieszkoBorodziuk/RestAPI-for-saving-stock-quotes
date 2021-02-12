@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query, DefaultValuePipe } from '@nestjs/common';
 import { StockQuotesService } from './stock-quotes.service';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
-import { GetOneStockQutesResponse, GetPaginatedListOfStockQotesResponse, StockQutesResponse } from './interfaces/stockQuotes';
+import { GetOneStockQutesResponse, GetPaginatedListOfStockQotesResponse, StockQutesResponse } from './dto/stockQuotes.dts';
 import { ApiBody, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger';
 
 @Controller('company/:company/stock-quotes')

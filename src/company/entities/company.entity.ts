@@ -1,6 +1,6 @@
 import { StockQuote } from "../../stock-quotes/entities/stock-quote.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { CompanyResponse } from "../interfaces/company";
+import { CompanyResponse } from "../dto/companydto.";
 
 @Entity()
 export class Company implements CompanyResponse {
