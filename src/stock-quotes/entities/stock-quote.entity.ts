@@ -3,10 +3,10 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 import { StockQutesResponse } from "../interfaces/stockQuotes";
 
 @Entity()
-export class StockQuote implements StockQutesResponse{
+export class StockQuote implements StockQutesResponse {
     @PrimaryGeneratedColumn('uuid')
     id: string;
-    
+
     @Column({
         type: 'float',
         scale: 2,

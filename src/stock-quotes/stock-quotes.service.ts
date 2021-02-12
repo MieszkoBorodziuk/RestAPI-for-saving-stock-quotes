@@ -88,12 +88,13 @@ export class StockQuotesService {
     return await this.stockQuoteRepository.findOneOrFail(id);
   }
 
-  async findOneByDate(date: Date, companyId): Promise<StockQuote> {
+  async findOneByDate(date: Date, companyId: string): Promise<StockQuote> { 
+
     return await this.stockQuoteRepository.findOne(
       {
         where: {
           company: companyId,
-          date: date,
+          date,
         },
       });
   }

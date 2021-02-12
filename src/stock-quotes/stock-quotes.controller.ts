@@ -32,7 +32,7 @@ export class StockQuotesController {
   @Get('/')
   findAll(
     @Param('company') company: string,
-    @Query('pageNumber', new DefaultValuePipe(3)) pageNumber: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
     @Query('pageSize', new DefaultValuePipe(5)) pageSize: number,
   ): Promise<GetPaginatedListOfStockQotesResponse> {
     return this.stockQuotesService.findAll(company, pageNumber, pageSize);
