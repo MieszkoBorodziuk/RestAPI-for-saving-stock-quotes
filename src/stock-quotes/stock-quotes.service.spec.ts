@@ -3,7 +3,7 @@ import { StockQuotesService } from './stock-quotes.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { StockQuote } from './entities/stock-quote.entity';
 import { RepositoryMock, repositoryMockFactory } from '../utils/mockFactory';
-import { Repository } from 'typeorm';
+import { Connection, QueryRunner, Repository } from 'typeorm';
 import { CompanyService } from '../company/company.service';
 import { Company } from '../company/entities/company.entity';
 import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
@@ -15,6 +15,22 @@ describe('StockQuotesService', () => {
   let service: StockQuotesService;
   let repository: RepositoryMock<Repository<StockQuote>>;
   let companyService: CompanyService;
+  let connection;
+  const mockConnection = () => ({
+    transaction: jest.fn(),
+    createQueryRunner: jest.fn()
+  });
+
+  const qr = {
+    manager: {},
+  } as QueryRunner;
+
+  class ConnectionMock {
+    createQueryRunner(mode?: "master" | "slave"): QueryRunner {
+      return qr;
+    }
+  }
+
 
   const companyServiceMock = {
     findOne: jest.fn(),
@@ -24,17 +40,30 @@ describe('StockQuotesService', () => {
   };
 
   beforeEach(async () => {
+    Object.assign(qr.manager, {
+      save: jest.fn(),
+      findOne: jest.fn()
+    });
+    qr.connect = jest.fn();
+    qr.release = jest.fn();
+    qr.startTransaction = jest.fn();
+    qr.commitTransaction = jest.fn();
+    qr.rollbackTransaction = jest.fn();
+    qr.release = jest.fn();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         StockQuotesService,
         { provide: getRepositoryToken(StockQuote), useFactory: repositoryMockFactory },
-        { provide: CompanyService, useValue: companyServiceMock }
+        { provide: CompanyService, useValue: companyServiceMock },
+        { provide: Connection, useFactory: mockConnection, useClass: ConnectionMock }
       ],
     }).compile();
 
     service = module.get<StockQuotesService>(StockQuotesService);
     companyService = module.get<CompanyService>(CompanyService);
     repository = module.get(getRepositoryToken(StockQuote));
+    connection = await module.get<Connection>(Connection);
   });
 
   it('should be defined', () => {
@@ -78,6 +107,9 @@ describe('StockQuotesService', () => {
   it('should create new StockQuote when call create', async () => {
 
     const request = generateRequest();
+    
+    const queryRunner = connection.createQueryRunner();
+
 
     const company = new Company();
     company.name = "Test"
@@ -85,17 +117,22 @@ describe('StockQuotesService', () => {
 
     const stockQuote = generateStockQuoteFromRequest(request, company);
 
-    companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
-    repository.findOne.mockReturnValue(null);
-    repository.save.mockReturnValue(stockQuote);
 
-    expect(await service.create(company.symbol, request)).toEqual(stockQuote)
+    companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
+    queryRunner.manager.findOne.mockReturnValue(null);
+    queryRunner.manager.save.mockReturnValue(stockQuote);
+
+    const testService = await service.create(company.symbol, request);
+    stockQuote.id = undefined;
+    expect(queryRunner.manager.save).toHaveBeenCalledWith(stockQuote);
+    expect(testService).toEqual(stockQuote);
   })
 
   it('should create new StockQuote when call create and already exists ', async () => {
 
     const request = generateRequest();
-
+    const queryRunner = connection.createQueryRunner();
+    
     const company = new Company();
     company.id = uuidv4();
     company.name = "Test"
@@ -104,8 +141,8 @@ describe('StockQuotesService', () => {
     const stockQuote = generateStockQuoteFromRequest(request, company);
 
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
-    repository.findOne.mockReturnValue(stockQuote);
-    repository.save.mockReturnValue(stockQuote);
+    queryRunner.manager.findOne.mockReturnValue(stockQuote);
+    queryRunner.manager.save.mockReturnValue(stockQuote);
 
     await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
       status: HttpStatus.FORBIDDEN,
@@ -116,6 +153,7 @@ describe('StockQuotesService', () => {
   it('should create new StockQuote when call create and lowPrice is higher than highPrice', async () => {
 
     const request = generateRequest();
+    const queryRunner = connection.createQueryRunner();
     request.lowPrice = 10;
 
     const company = new Company();
@@ -126,8 +164,8 @@ describe('StockQuotesService', () => {
     const stockQuote = generateStockQuoteFromRequest(request, company);
 
     companyService.findOneBySymbol = jest.fn().mockReturnValue(company);
-    repository.findOne.mockReturnValue(null)
-    repository.save.mockReturnValue(stockQuote);
+    queryRunner.manager.findOne.mockReturnValue(null)
+    queryRunner.manager.save.mockReturnValue(stockQuote);
 
     await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
       status: HttpStatus.BAD_REQUEST,
@@ -139,6 +177,7 @@ describe('StockQuotesService', () => {
   it('should return an array of StockQote when call findAll', async () => {
     const dbStockQoutes = [generateStockQuote(), generateStockQuote()]
     const result = [dbStockQoutes, 2];
+    
 
     repository.findAndCount.mockReturnValue(result);
 
