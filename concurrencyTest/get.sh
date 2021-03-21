@@ -3,4 +3,4 @@
 url=$1
 company=$2
 
-curl "$url/company/$company/stock-quotes"
+curl "$url/company/stock-quotes/$company"
