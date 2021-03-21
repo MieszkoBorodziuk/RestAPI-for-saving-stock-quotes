@@ -4,12 +4,10 @@ import { CompanyResponse } from "../dto/company.dto.";
 
 @Entity()
 export class Company implements CompanyResponse {
+    
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
-    name: string;
-    
     @Column()
     symbol: string;
 

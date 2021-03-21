@@ -4,8 +4,6 @@ export class CompanyResponse {
     @ApiProperty()
     id: string;
     @ApiProperty()
-    name: string;
-    @ApiProperty()
     symbol: string;
 }
 

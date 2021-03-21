@@ -6,13 +6,7 @@ export class StockQuotesResponse {
     @ApiProperty()
     id: string;
     @ApiProperty()
-    openPrice: number;
-    @ApiProperty()
-    highPrice: number;
-    @ApiProperty()
-    lowPrice: number;
-    @ApiProperty()
-    closePrice: number;
+    price: number;
     @ApiProperty()
     date: Date; 
 }

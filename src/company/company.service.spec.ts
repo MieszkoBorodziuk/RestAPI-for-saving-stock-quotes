@@ -32,14 +32,12 @@ describe('CompanyService', () => {
 
   const generateRequest = () => {
     const request = new CreateCompanyDto();
-    request.name = "test";
     request.symbol = "TST";
     return request;
   }
 
   const generateCompanyFromRequest = (request) => {
     const company = new Company();
-    company.name = request.name;
     company.symbol = request.symbol;
     return company;
   }
@@ -47,7 +45,6 @@ describe('CompanyService', () => {
   const generateCompany = () => {
     const company = new Company();
     company.id = uuidv4();
-    company.name = "test";
     company.symbol = "TST";
     return company;
   }

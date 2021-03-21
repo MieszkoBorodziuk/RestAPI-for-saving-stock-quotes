@@ -2,14 +2,17 @@
 
 url=$1
 company=$2
+I=0
 
-for run in {1..10}; do
+for run in {1..100}; do
+	DATE="2020-10-01T12:01:0${I}Z"
+	echo $DATE
 	curl -X POST "$url/company/$company/stock-quotes" -H "Content-Type: application/json" \
 	-d '{
-	    "openPrice": 1,
-	    "closePrice": 5,
-	    "highPrice": 6,
-	    "lowPrice": 1,
-	    "date": "2020-10-01T12:00:00Z"
+	    "price": 1,
+	    "symbol": "'"$company"'",
+	    "date": "'"$DATE"'"
 	}'
+	I=$(((I+1)%10))
 done
+

@@ -12,25 +12,7 @@ export class StockQuote implements StockQuotesResponse {
         type: 'float',
         scale: 2,
     })
-    openPrice: number;
-
-    @Column({
-        type: 'float',
-        scale: 2,
-    })
-    highPrice: number;
-
-    @Column({
-        type: 'float',
-        scale: 2,
-    })
-    lowPrice: number;
-
-    @Column({
-        type: 'float',
-        scale: 2,
-    })
-    closePrice: number;
+    price: number;
 
     @Column()
     date: Date;

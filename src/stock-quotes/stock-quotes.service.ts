@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable} from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyService } from '../company/company.service';
 import { Company } from '../company/entities/company.entity';
@@ -27,32 +27,22 @@ export class StockQuotesService {
   async create(createInstrumentDto: CreateInstrumentDto) {
     const queryRunner = this.connection.createQueryRunner();
 
-    if (createInstrumentDto.highPrice < createInstrumentDto.lowPrice) {
-      throw new HttpException({
-        status: HttpStatus.BAD_REQUEST,
-        error: "highPrice must be higher than lowPrice"
-      },
-        HttpStatus.BAD_REQUEST);
-    }
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      if(!await this.findCompany(createInstrumentDto.symbol))
-      this.companyService.create({name: createInstrumentDto.name, symbol: createInstrumentDto.symbol})
-      
+      if (!await this.findCompany(createInstrumentDto.symbol))
+        this.companyService.create({ symbol: createInstrumentDto.symbol })
+
 
       const company = await this.findCompany(createInstrumentDto.symbol);
-     
 
-      console.log(company);
-      
 
       if (await queryRunner.manager.findOne(StockQuote, {
         where: {
           company: company.id,
-          date: createInstrumentDto.date          
+          date: createInstrumentDto.date
         },
       })) {
         throw new HttpException({
@@ -62,10 +52,7 @@ export class StockQuotesService {
       }
 
       const newStockQuote = new StockQuote();
-      newStockQuote.openPrice = createInstrumentDto.openPrice;
-      newStockQuote.closePrice = createInstrumentDto.closePrice;
-      newStockQuote.highPrice = createInstrumentDto.highPrice;
-      newStockQuote.lowPrice = createInstrumentDto.lowPrice;
+      newStockQuote.price = createInstrumentDto.price;
       newStockQuote.date = createInstrumentDto.date;
       newStockQuote.company = company;
 

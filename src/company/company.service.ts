@@ -21,7 +21,6 @@ export class CompanyService {
       }, HttpStatus.FORBIDDEN);
     }
     const newCompany = new Company();
-    newCompany.name = createCompanyDto.name;
     newCompany.symbol = createCompanyDto.symbol;
 
     await this.companyRepository.save(newCompany);
