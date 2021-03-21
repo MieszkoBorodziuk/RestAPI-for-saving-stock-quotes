@@ -1,12 +1,12 @@
-import { HttpStatus, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyService } from '../company/company.service';
 import { Company } from '../company/entities/company.entity';
 import { Connection, Repository } from 'typeorm';
-import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { StockQuote } from './entities/stock-quote.entity';
-import { GetPaginatedListOfStockQotesResponse } from './dto/stockQuotes.dts';
+import { GetPaginatedListOfStockQuotesResponse } from './dto/stockQuotes.dto';
 import { HttpException } from '@nestjs/common';
+import { CreateInstrumentDto } from './dto/create-instrument.dto';
 
 @Injectable()
 export class StockQuotesService {
@@ -24,10 +24,10 @@ export class StockQuotesService {
     };
   }
 
-  async create(companySymbol: string, createStockQuoteDto: CreateStockQuoteDto) {
+  async create(createInstrumentDto: CreateInstrumentDto) {
     const queryRunner = this.connection.createQueryRunner();
 
-    if (createStockQuoteDto.highPrice < createStockQuoteDto.lowPrice) {
+    if (createInstrumentDto.highPrice < createInstrumentDto.lowPrice) {
       throw new HttpException({
         status: HttpStatus.BAD_REQUEST,
         error: "highPrice must be higher than lowPrice"
@@ -39,13 +39,20 @@ export class StockQuotesService {
     await queryRunner.startTransaction();
 
     try {
+      if(!await this.findCompany(createInstrumentDto.symbol))
+      this.companyService.create({name: createInstrumentDto.name, symbol: createInstrumentDto.symbol})
+      
 
-      const company = await this.findCompany(companySymbol);
+      const company = await this.findCompany(createInstrumentDto.symbol);
+     
+
+      console.log(company);
+      
 
       if (await queryRunner.manager.findOne(StockQuote, {
         where: {
           company: company.id,
-          date: createStockQuoteDto.date
+          date: createInstrumentDto.date          
         },
       })) {
         throw new HttpException({
@@ -55,11 +62,11 @@ export class StockQuotesService {
       }
 
       const newStockQuote = new StockQuote();
-      newStockQuote.openPrice = createStockQuoteDto.openPrice;
-      newStockQuote.closePrice = createStockQuoteDto.closePrice;
-      newStockQuote.highPrice = createStockQuoteDto.highPrice;
-      newStockQuote.lowPrice = createStockQuoteDto.lowPrice;
-      newStockQuote.date = createStockQuoteDto.date;
+      newStockQuote.openPrice = createInstrumentDto.openPrice;
+      newStockQuote.closePrice = createInstrumentDto.closePrice;
+      newStockQuote.highPrice = createInstrumentDto.highPrice;
+      newStockQuote.lowPrice = createInstrumentDto.lowPrice;
+      newStockQuote.date = createInstrumentDto.date;
       newStockQuote.company = company;
 
       await queryRunner.manager.save(newStockQuote);
@@ -74,7 +81,7 @@ export class StockQuotesService {
     }
   }
 
-  async findAll(searchTerm: string, pageNumber: number, pageSize: number): Promise<GetPaginatedListOfStockQotesResponse> {
+  async findAll(searchTerm: string, pageNumber: number, pageSize: number): Promise<GetPaginatedListOfStockQuotesResponse> {
 
     const company = await this.companyService.findOneBySymbol(searchTerm);
     if (!company) {
@@ -106,7 +113,12 @@ export class StockQuotesService {
   }
 
   async findOne(id: string): Promise<StockQuote> {
-    return await this.stockQuoteRepository.findOneOrFail(id);
+    return await this.stockQuoteRepository.findOneOrFail({
+      where: {
+        id,
+      },
+      relations: ['company']
+    });
   }
 
   async findOneByDate(date: Date, companyId: string): Promise<StockQuote> {

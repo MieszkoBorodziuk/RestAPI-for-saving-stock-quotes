@@ -10,6 +10,7 @@ import { CreateStockQuoteDto } from './dto/create-stock-quote.dto';
 import { uuidv4 } from '../utils/uuid';
 import { HttpStatus } from '@nestjs/common';
 import { HttpException } from '@nestjs/common';
+import { CreateInstrumentDto } from './dto/create-instrument.dto';
 
 describe('StockQuotesService', () => {
   let service: StockQuotesService;
@@ -71,7 +72,9 @@ describe('StockQuotesService', () => {
   });
 
   const generateRequest = () => {
-    const request = new CreateStockQuoteDto();
+    const request = new CreateInstrumentDto();
+    request.name = "Test",
+      request.symbol = "TST"
     request.openPrice = 1;
     request.closePrice = 2;
     request.highPrice = 3;
@@ -107,7 +110,7 @@ describe('StockQuotesService', () => {
   it('should create new StockQuote when call create', async () => {
 
     const request = generateRequest();
-    
+
     const queryRunner = connection.createQueryRunner();
 
 
@@ -122,7 +125,7 @@ describe('StockQuotesService', () => {
     queryRunner.manager.findOne.mockReturnValue(null);
     queryRunner.manager.save.mockReturnValue(stockQuote);
 
-    const testService = await service.create(company.symbol, request);
+    const testService = await service.create(request);
     stockQuote.id = undefined;
     expect(queryRunner.manager.save).toHaveBeenCalledWith(stockQuote);
     expect(testService).toEqual(stockQuote);
@@ -132,7 +135,7 @@ describe('StockQuotesService', () => {
 
     const request = generateRequest();
     const queryRunner = connection.createQueryRunner();
-    
+
     const company = new Company();
     company.id = uuidv4();
     company.name = "Test"
@@ -144,7 +147,7 @@ describe('StockQuotesService', () => {
     queryRunner.manager.findOne.mockReturnValue(stockQuote);
     queryRunner.manager.save.mockReturnValue(stockQuote);
 
-    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
+    await expect(service.create(request)).rejects.toStrictEqual(new HttpException({
       status: HttpStatus.FORBIDDEN,
       error: 'This stock quote already exists',
     }, HttpStatus.FORBIDDEN))
@@ -167,7 +170,7 @@ describe('StockQuotesService', () => {
     queryRunner.manager.findOne.mockReturnValue(null)
     queryRunner.manager.save.mockReturnValue(stockQuote);
 
-    await expect(service.create(company.symbol, request)).rejects.toStrictEqual(new HttpException({
+    await expect(service.create(request)).rejects.toStrictEqual(new HttpException({
       status: HttpStatus.BAD_REQUEST,
       error: "highPrice must be higher than lowPrice"
     },
@@ -177,7 +180,7 @@ describe('StockQuotesService', () => {
   it('should return an array of StockQote when call findAll', async () => {
     const dbStockQoutes = [generateStockQuote(), generateStockQuote()]
     const result = [dbStockQoutes, 2];
-    
+
 
     repository.findAndCount.mockReturnValue(result);
 

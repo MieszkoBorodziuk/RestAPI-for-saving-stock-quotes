@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { Company } from './entities/company.entity';
-import { CompanyResponse, GetPaginatedListOfCompanyResponse } from './dto/companydto.';
+import { CompanyResponse, GetPaginatedListOfCompanyResponse } from './dto/company.dto.';
 
 @Injectable()
 export class CompanyService {

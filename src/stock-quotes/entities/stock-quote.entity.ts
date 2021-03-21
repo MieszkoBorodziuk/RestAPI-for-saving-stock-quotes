@@ -1,10 +1,10 @@
 import { Company } from "../../company/entities/company.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
-import { StockQutesResponse } from "../dto/stockQuotes.dts";
+import { StockQuotesResponse } from "../dto/stockQuotes.dto";
 
 @Entity()
 @Unique(['company', 'date'])
-export class StockQuote implements StockQutesResponse {
+export class StockQuote implements StockQuotesResponse {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
