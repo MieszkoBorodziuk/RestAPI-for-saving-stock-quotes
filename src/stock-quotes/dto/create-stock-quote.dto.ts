@@ -6,19 +6,7 @@ export class CreateStockQuoteDto {
     @ApiProperty()
     @IsNumber()
     @Min(0)
-    openPrice: number;
-    @ApiProperty()
-    @IsNumber()
-    @Min(0)
-    highPrice: number;
-    @ApiProperty()
-    @IsNumber()
-    @Min(0)
-    lowPrice: number;
-    @ApiProperty()
-    @IsNumber()
-    @Min(0)
-    closePrice: number;
+    price: number;
     @ApiProperty()
     @IsDate()
     @Type(() => Date)
